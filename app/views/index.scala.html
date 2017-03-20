@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <title>RZD-Presale-Test</title>
+    </head>
+
+    <body>
+        <a href="@controllers.routes.DataController.getItem("f7b62706-bd4f-4055-838c-1dc571b25853")">getItem(f7b62706-bd4f-4055-838c-1dc571b25853)</a>
+        <br>
+        <a href="@controllers.routes.DataController.getItem("66a6dc00-323c-4001-8a48-87601e8f9a2f")">getItem(66a6dc00-323c-4001-8a48-87601e8f9a2f)</a>
+        <br>
+        <a href="@controllers.routes.DataController.getItem("c0e8df14-15da-4d5d-8cc2-73161d6cab32")">getItem(c0e8df14-15da-4d5d-8cc2-73161d6cab32)</a>
+        <br>
+        <a href="@controllers.routes.DataController.getItems(Some("POSITIVE"), Some("СЕВ"))">getItems(Some("POSITIVE"), Some("СЕВ"))</a>
+        <br>
+        <a href="@controllers.routes.DataController.getItems(Some("SoftNegative"), Some("С-КАВ"), 2)">getItems(Some("SoftNegative"), Some("С-КАВ"), 2)</a>
+        <br>
+        <a href="@controllers.routes.DataController.getItems(Some("NeutRaL"), Some("фпК"), 5)">getItems(Some("NeutRaL"), Some("фпК"), 5)</a>
+        <br>
+        <a href="@controllers.routes.DataController.getItems(Some("haRDNegatiVe"), None, 1)">getItems(Some("haRDNegatiVe"), None, 1)</a>
+        <br>
+        <a href="@controllers.routes.DataController.getItems(None, None, 15)">getItems(None, None, 15)</a>
+        <br>
+        <a href="@controllers.routes.DataController.getItems(None, Some("С-КаВ"), 5)">getItems(None, Some("С-КаВ"), 5)</a>
+    </body>
+
+</html>

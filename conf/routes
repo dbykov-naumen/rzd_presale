@@ -1,0 +1,9 @@
+GET         /                                            @controllers.HomeController.index
+
+GET         /assets/*file                                @controllers.Assets.versioned(path="/public", file: Asset)
+
+GET         /api/getItem/:uuid                           @controllers.DataController.getItem(uuid: String)
+POST        /api/getItem/:uuid                           @controllers.DataController.getItem(uuid: String)
+OPTIONS     /api/getItem/:uuid                           @controllers.DataController.getItem(uuid: String)
+
+GET         /api/getItems                                @controllers.DataController.getItems(moods: Option[String] ?= None, regionId: Option[String] ?= None, draw: Int ?= 1)
