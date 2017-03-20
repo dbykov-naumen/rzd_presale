@@ -248,7 +248,7 @@ class DataController @Inject()(configuration: play.api.Configuration)
                     "total" -> JsNumber(totalResolvingStatusesCounted.countInProgress +
                         totalResolvingStatusesCounted.countResolved +
                         totalResolvingStatusesCounted.countUnresolved),
-                    "complete" -> JsNumber(totalResolvingStatusesCounted.countResolved),
+                    "resolved" -> JsNumber(totalResolvingStatusesCounted.countResolved),
                     "inProgress" -> JsNumber(totalResolvingStatusesCounted.countInProgress),
                     "unresolved" -> JsNumber(totalResolvingStatusesCounted.countUnresolved)
                 )),
@@ -258,7 +258,7 @@ class DataController @Inject()(configuration: play.api.Configuration)
                         "regionId" -> JsString(regionId.getOrElse("")),
                         "counts" -> JsObject(Array[(String, JsValue)](
                             "total" -> JsNumber(x.totalInProgress + x.totalResolved + x.totalUnresolved),
-                            "complete" -> JsNumber(x.totalResolved),
+                            "resolved" -> JsNumber(x.totalResolved),
                             "inProgress" -> JsNumber(x.totalInProgress),
                             "unresolved" -> JsNumber(x.totalUnresolved)
                         ))
@@ -270,7 +270,7 @@ class DataController @Inject()(configuration: play.api.Configuration)
                         "regionId" -> JsString(regionId.getOrElse("")),
                         "counts" -> JsObject(Array[(String, JsValue)](
                             "total" -> JsNumber(x.totalInProgress + x.totalResolved + x.totalUnresolved),
-                            "complete" -> JsNumber(x.totalResolved),
+                            "resolved" -> JsNumber(x.totalResolved),
                             "inProgress" -> JsNumber(x.totalInProgress),
                             "unresolved" -> JsNumber(x.totalUnresolved)
                         ))
@@ -282,44 +282,44 @@ class DataController @Inject()(configuration: play.api.Configuration)
                         "regionId" -> JsString(regionId.getOrElse("")),
                         "counts" -> JsObject(Array[(String, JsValue)](
                             "total" -> JsNumber(x.totalInProgress + x.totalResolved + x.totalUnresolved),
-                            "complete" -> JsNumber(x.totalResolved),
+                            "resolved" -> JsNumber(x.totalResolved),
                             "inProgress" -> JsNumber(x.totalInProgress),
                             "unresolved" -> JsNumber(x.totalUnresolved)
                         ))
-                    ))
-                }),
-                "regions" -> JsArray(resolvingStatusesByAffiliates.map { x =>
-                    JsObject(Array[(String, JsValue)](
-                        "title" -> JsString(x.affiliate),
-                        "regionId" -> JsString(x.affiliate),
-                        "counts" -> JsObject(Array[(String, JsValue)](
-                            "total" -> JsNumber(x.totalInProgress + x.totalResolved + x.totalUnresolved),
-                            "complete" -> JsNumber(x.totalResolved),
-                            "inProgress" -> JsNumber(x.totalInProgress),
-                            "unresolved" -> JsNumber(x.totalUnresolved)
-                        ))
-                    ))
-                }),
-                "oldest" -> JsArray(top3OldestCalls.map { x =>
-                    representFullInfoAsJsonObject(x)
-                }),
-                "bests" -> JsArray(top3BestResponsibles.map { x =>
-                    JsObject(Array[(String, JsValue)](
-                        "regionId" -> JsString(x.affiliate),
-                        "title" -> JsString(x.responsible),
-                        "processed" -> JsNumber(x.numberResolved),
-                        "avgMinutes" -> JsNumber(x.avgTimeResolvingMinutes)
-                    ))
-                }),
-                "worst" -> JsArray(top3WorstResponsibles.map { x =>
-                    JsObject(Array[(String, JsValue)](
-                        "regionId" -> JsString(x.affiliate),
-                        "title" -> JsString(x.responsible),
-                        "processed" -> JsNumber(x.numberResolved),
-                        "avgMinutes" -> JsNumber(x.avgTimeResolvingMinutes)
                     ))
                 })
-            ))
+            )),
+            "regions" -> JsArray(resolvingStatusesByAffiliates.map { x =>
+                JsObject(Array[(String, JsValue)](
+                    "title" -> JsString(x.affiliate),
+                    "regionId" -> JsString(x.affiliate),
+                    "counts" -> JsObject(Array[(String, JsValue)](
+                        "total" -> JsNumber(x.totalInProgress + x.totalResolved + x.totalUnresolved),
+                        "resolved" -> JsNumber(x.totalResolved),
+                        "inProgress" -> JsNumber(x.totalInProgress),
+                        "unresolved" -> JsNumber(x.totalUnresolved)
+                    ))
+                ))
+            }),
+            "oldest" -> JsArray(top3OldestCalls.map { x =>
+                representFullInfoAsJsonObject(x)
+            }),
+            "bests" -> JsArray(top3BestResponsibles.map { x =>
+                JsObject(Array[(String, JsValue)](
+                    "regionId" -> JsString(x.affiliate),
+                    "title" -> JsString(x.responsible),
+                    "processed" -> JsNumber(x.numberResolved),
+                    "avgMinutes" -> JsNumber(x.avgTimeResolvingMinutes)
+                ))
+            }),
+            "worst" -> JsArray(top3WorstResponsibles.map { x =>
+                JsObject(Array[(String, JsValue)](
+                    "regionId" -> JsString(x.affiliate),
+                    "title" -> JsString(x.responsible),
+                    "processed" -> JsNumber(x.numberResolved),
+                    "avgMinutes" -> JsNumber(x.avgTimeResolvingMinutes)
+                ))
+            })
         ))
 
         Ok(Json.prettyPrint(jsonRes)).
