@@ -128,7 +128,7 @@ class DataController @Inject()(configuration: play.api.Configuration)
                 allowForAllDomains
 
         } else {
-            Ok.as("application/json").allowForAllDomains
+            Ok("{\"items\":[], \"recordsTotal\": 0, \"recordsFiltered\": 0}").as("application/json").allowForAllDomains
         }
     }
 
