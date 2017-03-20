@@ -32,18 +32,7 @@ object DataProcessor {
 
         val dataExtractor = new DataExtractor
 
-        val namedCategories = dataExtractor.extractNamedCategoriesFromPath(PathName).
-            groupBy(x => x._1).
-            filter(x => x._1 != null.asInstanceOf[String] && x._1 != "unknown" && x._1 != "").
-            map(x => x._1 -> x._2.head._2)
-
         allData = dataExtractor.extractFullInfoFromPath(PathName)
-
-        allData.map { fullInfo =>
-            fullInfo.category = if (namedCategories.contains(fullInfo.category)) namedCategories(fullInfo.category)
-            else "Без категории"
-            fullInfo
-        }
 
         ClstNamesHardNegative.foreach { fileName =>
             dataExtractor.extractRatingCallsFromExcel(
@@ -67,6 +56,16 @@ object DataProcessor {
             AcceptableWordsForPositiveCall,
             RatingStatus.Positive
         )
+
+        val namedCategories = dataExtractor.extractNamedCategoriesFromPath(PathName).
+            groupBy(x => x._1).
+            filter(x => x._1 != null.asInstanceOf[String] && x._1 != "unknown" && x._1 != "").
+            map(x => x._1 -> x._2.head._2)
+        allData.map { fullInfo =>
+            fullInfo.category = if (namedCategories.contains(fullInfo.category)) namedCategories(fullInfo.category)
+            else "Без категории"
+            fullInfo
+        }
 
         allData.map { fullInfo =>
             if (RatingStatus.Unknown == fullInfo.ratingStatus) fullInfo.ratingStatus = RatingStatus.Neutral
