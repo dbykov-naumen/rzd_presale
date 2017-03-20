@@ -1,9 +1,15 @@
-GET         /                                            @controllers.HomeController.index
+GET         /api                                         @controllers.HomeController.index
 
-GET         /assets/*file                                @controllers.Assets.versioned(path="/public", file: Asset)
+GET         /api/assets/*file                            @controllers.Assets.versioned(path="/public", file: Asset)
 
 GET         /api/getItem/:uuid                           @controllers.DataController.getItem(uuid: String)
 POST        /api/getItem/:uuid                           @controllers.DataController.getItem(uuid: String)
 OPTIONS     /api/getItem/:uuid                           @controllers.DataController.getItem(uuid: String)
 
 GET         /api/getItems                                @controllers.DataController.getItems(moods: Option[String] ?= None, regionId: Option[String] ?= None, draw: Int ?= 1)
+POST        /api/getItems                                @controllers.DataController.getItems(moods: Option[String] ?= None, regionId: Option[String] ?= None, draw: Int ?= 1)
+OPTIONS     /api/getItems                                @controllers.DataController.getItems(moods: Option[String] ?= None, regionId: Option[String] ?= None, draw: Int ?= 1)
+
+GET         /api/getInfo                                 @controllers.DataController.getInfo(regionId: Option[String] ?= None)
+POST        /api/getInfo                                 @controllers.DataController.getInfo(regionId: Option[String] ?= None)
+OPTIONS     /api/getInfo                                 @controllers.DataController.getInfo(regionId: Option[String] ?= None)

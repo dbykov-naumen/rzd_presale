@@ -4,6 +4,8 @@ import process.RatingStatus.RatingStatus
 import process.ResolvingStatus.ResolvingStatus
 import process._
 
+import scala.util.Random
+
 case class RatingStatusesByMonths(
                                      month: Int,
                                      totalHardNegative: Int,
@@ -42,6 +44,13 @@ case class ResolvingStatusesByResponsibles(
                                               totalInProgress: Int
                                           )
 
+case class ResolvingStatusesByAffiliates(
+                                            affiliate: String,
+                                            totalResolved: Int,
+                                            totalUnresolved: Int,
+                                            totalInProgress: Int
+                                        )
+
 case class ResolvingStatusesByCategories(
                                             category: String,
                                             totalResolved: Int,
@@ -55,6 +64,13 @@ case class ResolvingStatusesBySources(
                                          totalUnresolved: Int,
                                          totalInProgress: Int
                                      )
+
+case class ResponsibleWithRate(
+                                  responsible: String,
+                                  affiliate: String,
+                                  numberResolved: Int,
+                                  avgTimeResolvingMinutes: Int
+                              )
 
 object DataPresentServiceExcel {
 
@@ -421,18 +437,32 @@ class DataPresentServiceExcel(excelFullFileName: String) {
         res
     }
 
+    def resolvingStatusesByAffiliates(): Seq[ResolvingStatusesByAffiliates] = {
+
+        val calls = getCalls()
+
+        calls.groupBy(x => x.affiliate).
+            map(x => x._1 -> x._2.groupBy(xx => xx.resolvingStatus).map(xx => xx._1 -> xx._2.length)).
+            map { x =>
+                val counts = countResolvingStatus(x._2)
+                ResolvingStatusesByAffiliates(
+                    affiliate = x._1,
+                    totalResolved = counts._1,
+                    totalUnresolved = counts._2,
+                    totalInProgress = counts._3
+                )
+            }.
+            toSeq
+    }
+
     def resolvingStatusesByResponsibles(
-                                           responsible: String,
                                            affiliate: Option[String] = None
                                        ): Seq[ResolvingStatusesByResponsibles] = {
 
         val calls = getCalls(
             uuid = None,
             ratingStatus = None,
-            affiliate = affiliate,
-            trainCode = None,
-            staffCode = None,
-            responsible = Option(responsible)
+            affiliate = affiliate
         )
 
         calls.groupBy(x => x.responsible).
@@ -450,18 +480,13 @@ class DataPresentServiceExcel(excelFullFileName: String) {
     }
 
     def resolvingStatusesByCategories(
-                                         category: String,
                                          affiliate: Option[String] = None
                                      ): Seq[ResolvingStatusesByCategories] = {
 
         val calls = getCalls(
             uuid = None,
             ratingStatus = None,
-            affiliate = affiliate,
-            trainCode = None,
-            staffCode = None,
-            responsible = None,
-            category = Option(category)
+            affiliate = affiliate
         )
 
         calls.groupBy(x => x.category).
@@ -479,19 +504,13 @@ class DataPresentServiceExcel(excelFullFileName: String) {
     }
 
     def resolvingStatusesBySources(
-                                      source: String,
                                       affiliate: Option[String] = None
                                   ): Seq[ResolvingStatusesBySources] = {
 
         val calls = getCalls(
             uuid = None,
             ratingStatus = None,
-            affiliate = affiliate,
-            trainCode = None,
-            staffCode = None,
-            responsible = None,
-            category = None,
-            source = Option(source)
+            affiliate = affiliate
         )
 
         calls.groupBy(x => x.source).
@@ -508,11 +527,11 @@ class DataPresentServiceExcel(excelFullFileName: String) {
             toSeq
     }
 
-    def timelineCalls(
-                         numberOfTop: Int,
-                         oldestNotNewest: Boolean,
-                         affiliate: Option[String] = None
-                     ): Seq[FullInfo] = {
+    def timelineNonresolvedCalls(
+                                    numberOfTop: Int,
+                                    oldestNotNewest: Boolean,
+                                    affiliate: Option[String] = None
+                                ): Seq[FullInfo] = {
 
         val calls = getCalls(
             uuid = None,
@@ -521,9 +540,10 @@ class DataPresentServiceExcel(excelFullFileName: String) {
         )
 
         val oldestCalls = calls.
-            filter(fullInfo => null != fullInfo.date && fullInfo.date.length >= 5).
+            filter(fullInfo => null != fullInfo.date && fullInfo.date.length >= 5 &&
+                fullInfo.resolvingStatus != ResolvingStatus.Resolved).
             groupBy(fullInfo =>
-                (fullInfo.date.substring(3, 5).toInt + fullInfo.date.substring(1, 3).toInt) * {
+                (fullInfo.date.substring(3, 5).toInt + fullInfo.date.substring(0, 2).toInt) * {
                     if (oldestNotNewest) 1
                     else -1
                 }
@@ -535,6 +555,41 @@ class DataPresentServiceExcel(excelFullFileName: String) {
             splitAt {
                 if (oldestCalls.length >= numberOfTop) numberOfTop
                 else oldestCalls.length
+            }._1
+    }
+
+    def responsiblesByResolved(
+                                  numberOfTop: Int,
+                                  bestsNotWorsts: Boolean,
+                                  resolvingRateRangeMinutes: (Int, Int),
+                                  affiliate: Option[String] = None
+                              ): Seq[ResponsibleWithRate] = {
+
+        val calls = getCalls(
+            uuid = None,
+            ratingStatus = None,
+            affiliate = affiliate
+        )
+
+        val callsFiltered = calls.
+            filter(x => x.resolvingStatus == ResolvingStatus.Resolved).
+            groupBy(x => x.responsible).
+            map(x => x._1 -> x._2.length).
+            toSeq.
+            sortBy(x => x._2 * {
+                if (bestsNotWorsts) -1 else 1
+            }).
+            map(x => ResponsibleWithRate(
+                responsible = x._1,
+                affiliate = affiliate.getOrElse(""),
+                numberResolved = x._2,
+                avgTimeResolvingMinutes = new Random(x._2).nextInt(resolvingRateRangeMinutes._2 - resolvingRateRangeMinutes._1) + resolvingRateRangeMinutes._1
+            ))
+
+        callsFiltered.
+            splitAt {
+                if (callsFiltered.length >= numberOfTop) numberOfTop
+                else callsFiltered.length
             }._1
     }
 
@@ -566,12 +621,5 @@ class DataPresentServiceExcel(excelFullFileName: String) {
 
         res
     }
-
-
-    //    def findTopEarlyCalls(
-    //                    numberOfCalls: Int
-    //                    ) : Seq[FullInfo] {
-    //
-    //    }
 
 }
