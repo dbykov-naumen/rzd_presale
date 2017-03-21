@@ -175,6 +175,7 @@ class DataController @Inject()(configuration: play.api.Configuration)
         val staffsRatingStatusesCounted = simulateRatingStatusesCounted(
             totalRatingStatusesCounted, DataController.MulStaffsNeutral, DataController.MaxStaffsNeutral
         )
+        val ratingStatusesByAffiliates = presentServiceExcel.ratingStatusesByAffiliates()
 
         val resolvingStatusesByMonths = presentServiceExcel.resolvingStatusesByMonths(
             regionId
@@ -195,6 +196,7 @@ class DataController @Inject()(configuration: play.api.Configuration)
             regionId
         )
         val resolvingStatusesByAffiliates = presentServiceExcel.resolvingStatusesByAffiliates()
+
 
         val top3OldestCalls = presentServiceExcel.timelineNonresolvedCalls(
             numberOfTop = 3,
@@ -241,7 +243,21 @@ class DataController @Inject()(configuration: play.api.Configuration)
                     "hardNegative" -> JsNumber(staffsRatingStatusesCounted.countHardNegative),
                     "softNegative" -> JsNumber(staffsRatingStatusesCounted.countSoftNegative),
                     "neutral" -> JsNumber(staffsRatingStatusesCounted.countNeutral)
-                ))
+                )),
+                "regions" -> JsArray(ratingStatusesByAffiliates.map { x =>
+                    JsObject(Array[(String, JsValue)](
+                        "title" -> JsString(x.affiliate),
+                        "regionId" -> JsString(x.affiliate),
+                        "counts" -> JsObject(Array[(String, JsValue)](
+                            "total" -> JsNumber(x.totalHardNegative + x.totalSoftNegative
+                                + x.totalPositive + x.totalNeutral),
+                            "positive" -> JsNumber(x.totalPositive),
+                            "hardNegative" -> JsNumber(x.totalHardNegative),
+                            "softNegative" -> JsNumber(x.totalSoftNegative),
+                            "neutral" -> JsNumber(x.totalNeutral)
+                        ))
+                    ))
+                })
             )),
             "statistic" -> JsObject(Array[(String, JsValue)](
                 "all" -> JsObject(Array[(String, JsValue)](

@@ -30,6 +30,14 @@ case class RatingStatusesByStaffCodes(
                                          totalPositive: Int
                                      )
 
+case class RatingStatusesByAffiliates(
+                                         affiliate: String,
+                                         totalHardNegative: Int,
+                                         totalSoftNegative: Int,
+                                         totalNeutral: Int,
+                                         totalPositive: Int
+                                     )
+
 case class ResolvingStatusesByMonths(
                                         month: Int,
                                         totalResolved: Int,
@@ -399,6 +407,25 @@ class DataPresentServiceExcel(excelFullFileName: String) {
                 val counts = countRatingStatus(x._2)
                 RatingStatusesByStaffCodes(
                     staffCode = x._1,
+                    totalHardNegative = counts._1,
+                    totalSoftNegative = counts._2,
+                    totalNeutral = counts._3,
+                    totalPositive = counts._4
+                )
+            }.
+            toSeq
+    }
+
+    def ratingStatusesByAffiliates(): Seq[RatingStatusesByAffiliates] = {
+
+        val calls = getCalls()
+
+        calls.groupBy(x => x.affiliate).
+            map(x => x._1 -> x._2.groupBy(xx => xx.ratingStatus).map(xx => xx._1 -> xx._2.length)).
+            map { x =>
+                val counts = countRatingStatus(x._2)
+                RatingStatusesByAffiliates(
+                    affiliate = x._1,
                     totalHardNegative = counts._1,
                     totalSoftNegative = counts._2,
                     totalNeutral = counts._3,
