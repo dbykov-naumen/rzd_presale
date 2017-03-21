@@ -186,7 +186,7 @@ class DataController @Inject()(configuration: play.api.Configuration)
             countInProgress = resolvingStatusesByMonths.map(x => x.totalInProgress).sum
         )
 
-        val resolvingStatusesByResponsibles = presentServiceExcel.resolvingStatusesByResponsibles(
+        val resolvingStatusesByResponsibles = presentServiceExcel.resolvingStatusesByResponsiblesLastMonth(
             regionId
         ).filter(x => null != x.responsible && "" != x.responsible)
         val resolvingStatusesByCategories = presentServiceExcel.resolvingStatusesByCategories(
