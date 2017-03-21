@@ -186,7 +186,7 @@ class DataController @Inject()(configuration: play.api.Configuration)
             countInProgress = resolvingStatusesByMonths.map(x => x.totalInProgress).sum
         )
 
-        val resolvingStatusesByResponsibles = presentServiceExcel.resolvingStatusesByResponsiblesLastMonth(
+        val resolvingStatusesByResponsibles = presentServiceExcel.resolvingStatusesByResponsibles(
             regionId
         ).filter(x => null != x.responsible && "" != x.responsible)
         val resolvingStatusesByCategories = presentServiceExcel.resolvingStatusesByCategories(
@@ -204,13 +204,13 @@ class DataController @Inject()(configuration: play.api.Configuration)
             affiliate = regionId
         )
 
-        val top3BestResponsibles = presentServiceExcel.responsiblesByResolved(
+        val top3BestResponsibles = presentServiceExcel.responsiblesByResolvedLastMonth(
             numberOfTop = 3,
             bestsNotWorsts = true,
             resolvingRateRangeMinutes = 20 -> 40,
             affiliate = regionId
         )
-        val top3WorstResponsibles = presentServiceExcel.responsiblesByResolved(
+        val top3WorstResponsibles = presentServiceExcel.responsiblesByResolvedLastMonth(
             numberOfTop = 3,
             bestsNotWorsts = false,
             resolvingRateRangeMinutes = 35 -> 60,

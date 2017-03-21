@@ -482,9 +482,9 @@ class DataPresentServiceExcel(excelFullFileName: String) {
             toSeq
     }
 
-    def resolvingStatusesByResponsiblesLastMonth(
-                                                    affiliate: Option[String] = None
-                                                ): Seq[ResolvingStatusesByResponsibles] = {
+    def resolvingStatusesByResponsibles(
+                                           affiliate: Option[String] = None
+                                       ): Seq[ResolvingStatusesByResponsibles] = {
 
         val calls = getCalls(
             uuid = None,
@@ -492,16 +492,8 @@ class DataPresentServiceExcel(excelFullFileName: String) {
             affiliate = affiliate
         )
 
-        calls.
-            filter(x => null != x.date && x.date.length >= 5).
-            groupBy(x => x.responsible).
-            map { x =>
-                val byMonth = x._2.groupBy(xx => xx.date.substring(3, 5).toInt)
-                val fullInfoLastMonth = byMonth.maxBy(_._1)._2
-                x._1 -> fullInfoLastMonth.
-                    groupBy(xx => xx.resolvingStatus).
-                    map(xx => xx._1 -> xx._2.length)
-            }.
+        calls.groupBy(x => x.responsible).
+            map(x => x._1 -> x._2.groupBy(xx => xx.resolvingStatus).map(xx => xx._1 -> xx._2.length)).
             map { x =>
                 val counts = countResolvingStatus(x._2)
                 ResolvingStatusesByResponsibles(
@@ -593,12 +585,12 @@ class DataPresentServiceExcel(excelFullFileName: String) {
             }._1
     }
 
-    def responsiblesByResolved(
-                                  numberOfTop: Int,
-                                  bestsNotWorsts: Boolean,
-                                  resolvingRateRangeMinutes: (Int, Int),
-                                  affiliate: Option[String] = None
-                              ): Seq[ResponsibleWithRate] = {
+    def responsiblesByResolvedLastMonth(
+                                           numberOfTop: Int,
+                                           bestsNotWorsts: Boolean,
+                                           resolvingRateRangeMinutes: (Int, Int),
+                                           affiliate: Option[String] = None
+                                       ): Seq[ResponsibleWithRate] = {
 
         val calls = getCalls(
             uuid = None,
@@ -608,8 +600,13 @@ class DataPresentServiceExcel(excelFullFileName: String) {
 
         val callsFiltered = calls.
             filter(x => x.resolvingStatus == ResolvingStatus.Resolved).
+            filter(x => null != x.date && x.date.length >= 5).
             groupBy(x => x.responsible).
-            map(x => x._1 -> x._2.length).
+            map { x =>
+                val byMonth = x._2.groupBy(xx => xx.date.substring(3, 5).toInt)
+                val numberLastMonth = byMonth.maxBy(_._1)._2.length
+                x._1 -> numberLastMonth
+            }.
             toSeq.
             sortBy(x => x._2 * {
                 if (bestsNotWorsts) -1 else 1
